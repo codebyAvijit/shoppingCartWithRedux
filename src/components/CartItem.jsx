@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import {
   decreaseCartItemQuantity,
   increaseCartItemQuantity,
+  removeItemsFromCart,
 } from "../store/slices/cartItemsSlice";
 
 export default function CartItem({
@@ -23,6 +24,10 @@ export default function CartItem({
     dispatch(increaseCartItemQuantity(productId));
   };
 
+  const removeItemHandler = () => {
+    dispatch(removeItemsFromCart(productId));
+  };
+
   return (
     <div className="cart-item-container">
       <div className="cart-item">
@@ -37,6 +42,7 @@ export default function CartItem({
         <button onClick={decreaseQuantityHandler}>-</button>
         <span>{quantity}</span>
         <button onClick={increaseQuantityHandler}>+</button>
+        <button onClick={removeItemHandler}>Remove</button>
       </div>
       <div className="item-total">${quantity * price}</div>
     </div>

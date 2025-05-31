@@ -1,6 +1,6 @@
 import { produce } from "immer";
 
-let originalState = [];
+const originalState = [];
 
 //actions performed on cart
 const CART_ADD_ITEM = "cart/addItem";
@@ -41,53 +41,43 @@ export const decreaseCartItemQuantity = (productId) => {
 
 //reducer funtion for cart items
 const cartItemsReducer = (state = originalState, action) => {
-  // console.log(action);
-  const existingItemIndex = state.findIndex((singleCartItem) => {
-    return singleCartItem.productId === action.payload.productId;
-  });
+  return produce(state, (draft) => {
+    const existingItemIndex = draft.findIndex(
+      (item) => item.productId === action.payload?.productId
+    );
 
-  produce(originalState, (state) => {
     switch (action.type) {
-      case CART_ADD_ITEM: {
+      case CART_ADD_ITEM:
         if (existingItemIndex !== -1) {
-          state[existingItemIndex].quantity += 1;
-          return state;
+          draft[existingItemIndex].quantity += 1;
+        } else {
+          draft.push({ ...action.payload, quantity: 1 });
         }
-        state.push({ ...action.payload, quantity: 1 });
-      }
-      case CART_REMOVE_ITEM: {
-        state.splice(existingItemIndex, 1);
-        return state;
-      }
-      case CART_ITEM_INCREASE_QUANTITY: {
-        return state.map((singleItem) => {
-          if (singleItem.productId === action.payload.productId) {
-            return {
-              ...singleItem,
-              quantity: singleItem.quantity + 1,
-            };
+        break;
+
+      case CART_REMOVE_ITEM:
+        if (existingItemIndex !== -1) {
+          draft.splice(existingItemIndex, 1);
+        }
+        break;
+
+      case CART_ITEM_INCREASE_QUANTITY:
+        if (existingItemIndex !== -1) {
+          draft[existingItemIndex].quantity += 1;
+        }
+        break;
+
+      case CART_ITEM_DECREASE_QUANTITY:
+        if (existingItemIndex !== -1) {
+          draft[existingItemIndex].quantity -= 1;
+          if (draft[existingItemIndex].quantity <= 0) {
+            draft.splice(existingItemIndex, 1);
           }
-          return singleItem;
-        });
-      }
-      case CART_ITEM_DECREASE_QUANTITY: {
-        return state
-          .map((singleItem) => {
-            if (singleItem.productId === action.payload.productId) {
-              return {
-                ...singleItem,
-                quantity: singleItem.quantity - 1,
-              };
-            }
-            return singleItem;
-          })
-          .filter((singleItem) => {
-            return singleItem.quantity > 0;
-          });
-      }
-      default: {
+        }
+        break;
+
+      default:
         return state;
-      }
     }
   });
 };
